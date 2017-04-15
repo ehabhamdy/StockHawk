@@ -49,7 +49,13 @@ public class DetailActivity extends AppCompatActivity {
             @Override
             protected Stock doInBackground(String... strings) {
                 try {
+
+                    Calendar from = Calendar.getInstance();
+                    Calendar to = Calendar.getInstance();
+                    from.add(Calendar.YEAR, -5);
+
                     stock = YahooFinance.get(symbol, true);
+                    //stock = YahooFinance.get(symbol, from, to, Interval.WEEKLY);
                     stockHistQuotes = stock.getHistory();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -63,6 +69,7 @@ public class DetailActivity extends AppCompatActivity {
                 super.onPostExecute(stock);
                 quote = stock.getQuote();
                 setTitle(stock.getName());
+
                 Collections.sort(stockHistQuotes, new QuoteComparator());
 
                 /*String output = stock.getName() + " " + quote.getPrice();
@@ -70,9 +77,10 @@ public class DetailActivity extends AppCompatActivity {
                     output += "\n" + h.getDate().get(Calendar.YEAR)
                             + "/" + h.getDate().get(Calendar.MONTH) + "/" + h.getDate().get(Calendar.DAY_OF_MONTH) + "-----" + h.getHigh()
                             //+ " / " + h.getLow() + "===" + h.getDate().get(Calendar.YEAR) + h.getDate().get(Calendar.MONTH);
-                          +"==="+ Float.valueOf(h.getDate().get(Calendar.MONTH)) +", " + Float.valueOf(String.valueOf(h.getHigh()));
+                          +"==="+ Float.valueOf(h.getDate().get(Calendar.MONTH)) +", " + h.getDate().getTimeInMillis();
                 }
-                tv.setText(output);*/
+                *///tv.setText(output);
+
 
                 LineChart chart = (LineChart) findViewById(R.id.chart);
                 List<Entry> entries = new ArrayList<Entry>();
@@ -80,7 +88,7 @@ public class DetailActivity extends AppCompatActivity {
                     entries.add(new Entry(Float.valueOf(h.getDate().get(Calendar.MONTH)), Float.valueOf(String.valueOf(h.getHigh()))));
                 }
 
-                LineDataSet dataSet = new LineDataSet(entries, "Stock price");
+                LineDataSet dataSet = new LineDataSet(entries, "Stock price in USD");
                 LineData lineData = new LineData(dataSet);
                 chart.setData(lineData);
                 chart.invalidate();
@@ -92,7 +100,6 @@ public class DetailActivity extends AppCompatActivity {
     public class QuoteComparator implements Comparator<HistoricalQuote> {
         @Override
         public int compare(HistoricalQuote e1, HistoricalQuote e2) {
-
             if (e1.getDate().get(Calendar.MONTH) <
                     e2.getDate().get(Calendar.MONTH))
                 return -1;
