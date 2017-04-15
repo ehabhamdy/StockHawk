@@ -73,10 +73,12 @@ public final class QuoteSyncJob {
 
 
                 Stock stock = quotes.get(symbol);
-                StockQuote quote = stock.getQuote();
+                StockQuote quote = null;
+                if (stock != null)
+                    quote = stock.getQuote();
 
                 // Fixing crash when unavailable stock is added
-                if (quote.getPrice() != null) {
+                if (quote != null && stock.getQuote().getPrice() != null) {
                     float price = quote.getPrice().floatValue();
                     float change = quote.getChange().floatValue();
                     float percentChange = quote.getChangeInPercent().floatValue();
@@ -104,9 +106,12 @@ public final class QuoteSyncJob {
                     quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
 
                     quoteCVs.add(quoteCV);
+                } else {
+                    PrefUtils.removeStock(context, symbol);
                 }
 
             }
+
 
             context.getContentResolver()
                     .bulkInsert(
